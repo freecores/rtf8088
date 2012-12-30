@@ -358,6 +358,7 @@ parameter IFETCH=8'd1;
 parameter IFETCH_ACK = 8'd2;
 parameter XI_FETCH = 8'd3;
 parameter XI_FETCH_ACK = 8'd4;
+parameter REGFETCHA = 8'd5;
 parameter DECODE = 8'd7;
 parameter DECODER2 = 8'd8;
 parameter DECODER3 = 8'd9;
@@ -741,6 +742,7 @@ always @(posedge CLK)
 `include "IFETCH.v"
 `include "DECODE.v"
 `include "DECODER2.v"
+`include "REGFETCHA.v"
 `include "EACALC.v"
 `include "CMPSB.v"
 `include "CMPSW.v"

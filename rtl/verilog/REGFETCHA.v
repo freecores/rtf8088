@@ -1,10 +1,11 @@
-//=============================================================================
-//  INTA: acknowledge interrupt
+// ============================================================================
+//  REGFETCHA
+//  - fetch register value into 'A' side ALU
 //
 //
-//  2009,2010,2012 Robert Finch
+//  (C) 2009-2012  Robert Finch
 //  Stratford
-//  robfinch<remove>opencores.org
+//  robfinch[remove]@opencores.org
 //
 //
 // This source file is free software: you can redistribute it and/or modify 
@@ -21,43 +22,12 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.    
 //
 //
-// - issue two interrupt acknowledge cycles
-// - one the second cycle load the interrupt number
-//=============================================================================
+//  Verilog 
 //
-INTA0:
+// ============================================================================
+//
+REGFETCHA:
 	begin
-		cyc_type <= `CT_INTA;
-		inta_o <= 1'b1;
-		mio_o <= 1'b0;
-		lock_o <= 1'b1;
-		cyc_o <= 1'b1;
-		stb_o <= 1'b1;
-		we_o  <= 1'b0;
-		state <= INTA1;
-	end
-INTA1:
-	if (ack_i) begin
-		cyc_type <= `CT_PASSIVE;
-		mio_o <= 1'b1;
-		stb_o <= 1'b0;
-		state <= INTA2;
-	end
-INTA2:
-	begin
-		cyc_type <= `CT_INTA;
-		mio_o <= 1'b0;
-		stb_o <= 1'b1;
-		state <= INTA3;
-	end
-INTA3:
-	if (ack_i) begin
-		cyc_type <= `CT_PASSIVE;
-		inta_o <= 1'b0;
-		mio_o <= 1'b1;
-		lock_o <= 1'b0;
-		cyc_o <= 1'b0;
-		stb_o <= 1'b0;
-		int_num <= dat_i;
-		state <= INT2;
+		a <= rrro;
+		state <= EXECUTE;
 	end

@@ -37,7 +37,7 @@ DECODE:
 		begin
 			w <= 1'b1;
 			rrr <= ir[2:0];
-			state <= EXECUTE;
+			state <= REGFETCHA;
 		end
 
 	`LEA: state <= EXECUTE;
