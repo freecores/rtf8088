@@ -253,6 +253,7 @@ EXECUTE:
 			begin
 				state <= IFETCH;
 				wrregs <= 1'b1;
+				rrr <= rm;
 				if (w)
 					case(rrr)
 					3'b000:	// ROL
@@ -281,12 +282,14 @@ EXECUTE:
 						end
 					3'b100:	// SHL
 						begin
+							$display("SHL:%h,%h,%d",shlo[15:0],b,shftamt);
 							res <= shlo[15:0];
 							cf <= shlo[16];
 							vf <= b[15]^b[14];
 						end
 					3'b101:	// SHR
 						begin
+							$display("SHR:%h,%h,%d",shruo[31:16],b,shftamt);
 							res <= shruo[31:16];
 							cf <= shruo[15];
 							vf <= b[15];
