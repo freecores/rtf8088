@@ -94,6 +94,7 @@ IFETCH_ACK:
 //		ir_ip <= dat_i;
 		w <= dat_i[0];
 		d <= dat_i[1];
+		v <= dat_i[1];
 		sxi <= dat_i[1];
 		sreg2 <= dat_i[4:3];
 		sreg3 <= {1'b0,dat_i[4:3]};

@@ -134,6 +134,11 @@ EACALC:
 						res <= rmo;
 						b <= rrro;
 					end
+				// shifts and rotates
+				8'hD0,8'hD1,8'hD2,8'hD3:
+					begin
+						b <= rmo;
+					end
 				default:
 				    begin
 						if (d) begin

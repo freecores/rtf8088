@@ -73,6 +73,19 @@ wire eq  = a == b;
 wire ltu = a < b;
 wire lt  = as < bs;
 
+wire [31:0] shlo = {16'h0000,b} << shftamt;
+wire [31:0] shruo = {b,16'h0000} >> shftamt;
+wire [15:0] shro = ~(~b >> shftamt);
+wire [32:0] shlco = {16'h0000,b,cf} << shftamt;
+wire [32:0] shrcuo = {cf,b,16'h0000} >> shftamt;
+
+wire [15:0] shlo8 = {8'h00,b[7:0]} << shftamt;
+wire [15:0] shruo8 = {b[7:0],8'h00} >> shftamt;
+wire [ 7:0] shro8 = ~(~b[7:0] >> shftamt);
+wire [16:0] shlco8 = {8'h00,b,cf} << shftamt;
+wire [16:0] shrcuo8 = {cf,b[7:0],8'h00} >> shftamt;
+
+
 always @(ir or ir2 or a or b or cf or af or al or ah or aldv10 or TTT)
 	begin
 		casex(ir)

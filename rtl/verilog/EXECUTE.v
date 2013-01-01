@@ -257,43 +257,43 @@ EXECUTE:
 					case(rrr)
 					3'b000:	// ROL
 						begin
-							res <= {b[14:0],b[15]};
+							res <= shlo[15:0]|shlo[31:16];
 							cf <= bmsb;
 							vf <= bmsb^b[14];
 						end
 					3'b001:	// ROR
 						begin
-							res <= {b[0],b[15:1]};
+							res <= shruo[15:0]|shruo[31:16];
 							cf <= b[0];
 							vf <= cf^b[15];
 						end
 					3'b010:	// RCL
 						begin
-							res <= {b[14:0],cf};
+							res <= shlco[16:1]|shlco[32:17];
 							cf <= b[15];
 							vf <= b[15]^b[14];
 						end
 					3'b011:	// RCR
 						begin
-							res <= {cf,b[15:1]};
+							res <= shrcuo[15:0]|shrcuo[31:16];
 							cf <= b[0];
 							vf <= cf^b[15];
 						end
 					3'b100:	// SHL
 						begin
-							res <= {b[14:0],1'b0};
-							cf <= b[15];
+							res <= shlo[15:0];
+							cf <= shlo[16];
 							vf <= b[15]^b[14];
 						end
 					3'b101:	// SHR
 						begin
-							res <= {1'b0,b[15:1]};
-							cf <= b[0];
+							res <= shruo[31:16];
+							cf <= shruo[15];
 							vf <= b[15];
 						end
 					3'b111:	// SAR
 						begin
-							res <= {b[15],b[15:1]};
+							res <= shro;
 							cf <= b[0];
 							vf <= 1'b0;
 						end
@@ -302,43 +302,43 @@ EXECUTE:
 					case(rrr)
 					3'b000:	// ROL
 						begin
-							res <= {b[6:0],b[7]};
+							res <= shlo8[7:0]|shlo8[15:8];
 							cf <= b[7];
 							vf <= b[7]^b[6];
 						end
 					3'b001:	// ROR
 						begin
-							res <= {b[0],b[7:1]};
+							res <= shruo8[15:8]|shruo8[7:0];
 							cf <= b[0];
 							vf <= cf^b[7];
 						end
 					3'b010:	// RCL
 						begin
-							res <= {b[6:0],cf};
+							res <= shlco8[8:1]|shlco8[16:9];
 							cf <= b[7];
 							vf <= b[7]^b[6];
 						end
 					3'b011:	// RCR
 						begin
-							res <= {cf,b[7:1]};
+							res <= shrcuo8[15:8]|shrcuo8[7:0];
 							cf <= b[0];
 							vf <= cf^b[7];
 						end
 					3'b100:	// SHL
 						begin
-							res <= {b[6:0],1'b0};
-							cf <= b[7];
+							res <= shlo8[7:0];
+							cf <= shlo8[8];
 							vf <= b[7]^b[6];
 						end
 					3'b101:	// SHR
 						begin
-							res <= {1'b0,b[7:1]};
-							cf <= b[0];
+							res <= shruo8[15:8];
+							cf <= shruo8[7];
 							vf <= b[7];
 						end
 					3'b111:	// SAR
 						begin
-							res <= {b[7],b[7:1]};
+							res <= shro8;
 							cf <= b[0];
 							vf <= 1'b0;
 						end

@@ -27,7 +27,7 @@
 //  650 ff's / 2 MULTs
 //
 //  Webpack 14.3  xc6slx45 3-csg324
-//  701 ff's 4115 LUTs / 90.261 MHz
+//  736 ff's 4433 LUTs / 90.360 MHz
 // ============================================================================
 
 //`define BYTES_ONLY	1'b1
@@ -664,6 +664,7 @@ wire resz;
 reg [2:0] cyc_type;			// type of bus sycle
 reg w;						// 0=8 bit, 1=16 bit
 reg d;
+reg v;						// 1=count in cl, 0 = count is one
 reg [1:0] mod;
 reg [2:0] rrr;
 reg [2:0] rm;
@@ -688,6 +689,7 @@ reg [1:0] S43;
 reg wrregs;
 reg wrsregs;
 wire take_br;
+reg [3:0] shftamt;
 
 reg nmi_armed;
 reg rst_nmi;				// reset the nmi flag
