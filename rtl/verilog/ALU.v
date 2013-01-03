@@ -62,6 +62,8 @@ wire signed [7:0] als = a[7:0];
 wire signed [7:0] bls = b[7:0];
 wire signed [15:0] p = als * bls;
 wire signed [31:0] wp = sa * sb;
+wire [15:0] p16 = a[7:0] * b[7:0];
+wire [31:0] p32 = a * b;
 
 // Compute AL/10
 // - multiply by 1/10 = 26/256
@@ -85,6 +87,49 @@ wire [ 7:0] shro8 = ~(~b[7:0] >> shftamt);
 wire [16:0] shlco8 = {8'h00,b,cf} << shftamt;
 wire [16:0] shrcuo8 = {cf,b[7:0],8'h00} >> shftamt;
 
+wire div16_done;
+wire div32_done;
+wire [15:0] q16;
+wire [7:0] r16;
+wire [31:0] q32;
+wire [15:0] r32;
+wire [31:0] negdxax = -{dx,ax};
+
+divr2 #(16) udiv1
+(
+	.rst(rst_i),
+	.clk(clk_i),
+	.ce(1'b1),
+	.ld(ld_div16),
+	.su(TTT[0]),
+	.ri(1'b0),
+	.a(ax),
+	.b(b[7:0]),
+	.i(8'h00),
+	.q(q16),
+	.r(r16),
+	.divByZero(),
+	.done(div16_done)
+);
+
+
+divr2 #(32) udiv2
+(
+	.rst(rst_i),
+	.clk(clk_i),
+	.ce(1'b1),
+	.ld(ld_div32),
+	.su(TTT[0]),
+	.ri(1'b0),
+	.a({dx,ax}),
+	.b(b),
+	.i(16'h0000),
+	.q(q32),
+	.r(r32),
+	.divByZero(),
+	.done(div32_done)
+);
+
 
 always @(ir or ir2 or a or b or cf or af or al or ah or aldv10 or TTT)
 	begin
@@ -104,6 +149,7 @@ always @(ir or ir2 or a or b or cf or af or al or ah or aldv10 or TTT)
 		`ADC,`ADC_ALI8,`ADC_AXI16: alu_o <= a + b + cf;
 		`SBB,`SBB_ALI8,`SBB_AXI16: alu_o <= a - b - cf;
 		`AND,`AND_ALI8,`AND_AXI16: alu_o <= a & b;
+		`TEST,`TEST_ALI8,`TEST_AXI16: alu_o <= a & b;
 		`OR, `OR_ALI8, `OR_AXI16:  alu_o <= a | b;
 		`XOR,`XOR_ALI8,`XOR_AXI16: alu_o <= a ^ b;
 		`CMP,`CMP_ALI8,`CMP_AXI16: alu_o <= a - b;
@@ -132,6 +178,17 @@ always @(ir or ir2 or a or b or cf or af or al or ah or aldv10 or TTT)
 			3'd4:	alu_o <= a & b;			// AND
 			3'd5:	alu_o <= a - b;			// SUB
 			3'd6:	alu_o <= a ^ b;			// XOR
+			default:	alu_o <= 16'h0000;
+			endcase
+		8'hF6,8'hF7:
+			case(TTT)
+			3'd0:	alu_o <= a & b;			// TEST
+			3'd2:	alu_o <= ~b;			// NOT
+			3'd3:	alu_o <= -b;			// NEG
+			3'd4:	alu_o <= w ? p32[15:0] : p16;		// MUL
+			3'd5:	alu_o <= w ? wp[15:0] : p[15:0];	// IMUL
+			3'd6:	alu_o <= 16'h0000;		// DIV
+			3'd7:	alu_o <= 16'h0000;		// IDIV
 			default:	alu_o <= 16'h0000;
 			endcase
 		`AAA:

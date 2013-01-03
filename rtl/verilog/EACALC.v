@@ -139,6 +139,8 @@ EACALC:
 					begin
 						b <= rmo;
 					end
+				8'hF6,8'hF7:
+					b <= rmo;
 				default:
 				    begin
 						if (d) begin

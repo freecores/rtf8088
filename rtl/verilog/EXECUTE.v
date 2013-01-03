@@ -100,13 +100,70 @@ EXECUTE:
 
 		8'hF6,8'hF7:
 			begin
-				wrregs <= 1'b1;
 				state <= IFETCH;
-				case(rrr)
-				3'd2: res <= ~b;	// NOT
-				3'd3: res <= -b;	// NEG
+				res <= alu_o;
+				case(TTT)
+				3'd0:	// TEST
+					begin
+						pf <= pres;
+						cf <= 1'b0;
+						vf <= 1'b0;
+						sf <= resn;
+						zf <= resz;
+					end
+				3'd2:	// NOT
+					begin
+						wrregs <= 1'b1;
+					end
+				3'd3:	// NEG
+					begin
+						pf <= pres;
+						af <= carry   (1'b1,1'b0,b[3],alu_o[3]);
+						cf <= carry   (1'b1,1'b0,bmsb,resn);
+						vf <= overflow(1'b1,1'b0,bmsb,resn);
+						sf <= resn;
+						zf <= resz;
+						wrregs <= 1'b1;
+					end
+				// Normally only a single register update is required, however with 
+				// multiply word both AX and DX need to be updated. So we bypass the
+				// regular update here.
+				3'd4:
+					begin
+						if (w) begin
+							ax <= p32[15:0];
+							dx <= p32[31:16];
+							cf <= p32[31:16]!=16'd0;
+							vf <= p32[31:16]!=16'd0;
+						end
+						else begin
+							ax <= p16;
+							cf <= p16[15:8]!=8'd0;
+							vf <= p16[15:8]!=8'd0;
+						end
+					end
+				3'd5:
+					begin
+						if (w) begin
+							ax <= wp[15:0];
+							dx <= wp[31:16];
+							cf <= p32[31:16]!=16'd0;
+							vf <= p32[31:16]!=16'd0;
+						end
+						else begin
+							ax <= p;
+							cf <= p[15:8]!=8'd0;
+							vf <= p[15:8]!=8'd0;
+						end
+					end
+				3'd6,3'd7:
+					begin
+						state <= DIVIDE1;
+					end
+				default:	;
 				endcase
 			end
+
 		`INC_REG:
 			begin
 				state <= IFETCH;
@@ -282,14 +339,12 @@ EXECUTE:
 						end
 					3'b100:	// SHL
 						begin
-							$display("SHL:%h,%h,%d",shlo[15:0],b,shftamt);
 							res <= shlo[15:0];
 							cf <= shlo[16];
 							vf <= b[15]^b[14];
 						end
 					3'b101:	// SHR
 						begin
-							$display("SHR:%h,%h,%d",shruo[31:16],b,shftamt);
 							res <= shruo[31:16];
 							cf <= shruo[15];
 							vf <= b[15];

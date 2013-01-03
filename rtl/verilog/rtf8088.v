@@ -27,7 +27,7 @@
 //  650 ff's / 2 MULTs
 //
 //  Webpack 14.3  xc6slx45 3-csg324
-//  736 ff's 4433 LUTs / 90.360 MHz
+//  884 ff's 5064 LUTs / 79.788 MHz
 // ============================================================================
 
 //`define BYTES_ONLY	1'b1
@@ -210,6 +210,8 @@
 `define MOVSW		8'hA5
 `define CMPSB		8'hA6
 `define CMPSW		8'hA7
+`define TEST_ALI8	8'hA8
+`define TEST_AXI16	8'hA9
 `define STOSB		8'hAA
 `define STOSW		8'hAB
 `define LODSB		8'hAC
@@ -343,9 +345,9 @@ F6/F7:
 	010 = NOT
 	011 = NEG
 	100 = MUL
-	101 =
-	110 = 
-	111 = 
+	101 = IMUL
+	110 = DIV
+	111 = IDIV
 */
 `define ADDRESS_INACTIVE	20'hFFFFF
 `define DATA_INACTIVE		8'hFF
@@ -576,6 +578,12 @@ parameter CALL_FIN2 = 8'd212;
 parameter CALL_FIN3 = 8'd213;
 parameter CALL_FIN4 = 8'd214;
 
+parameter DIVIDE1 = 8'd215;
+parameter DIVIDE1a = 8'd216;
+parameter DIVIDE2 = 8'd217;
+parameter DIVIDE2a = 8'd218;
+parameter DIVIDE3 = 8'd219;
+
 parameter INT = 8'd220;
 parameter INT1 = 8'd221;
 parameter INT2 = 8'd222;
@@ -690,6 +698,8 @@ reg wrregs;
 reg wrsregs;
 wire take_br;
 reg [3:0] shftamt;
+reg ld_div16,ld_div32;		// load divider
+reg div_sign;
 
 reg nmi_armed;
 reg rst_nmi;				// reset the nmi flag
@@ -703,7 +713,7 @@ wire NMI = nmi_i;
 `include "CONTROL_LOGIC.v"
 `include "which_seg.v"
 evaluate_branch u4 (ir,cx,zf,cf,sf,vf,pf,take_br);
-`include "ALU.v"
+`include "c:\cores\bcxa6\rtl\verilog\eight_bit\ALU.v"
 nmi_detector u6 (RESET, CLK, NMI, rst_nmi, pe_nmi);
 
 always @(posedge CLK)
@@ -730,12 +740,16 @@ always @(posedge CLK)
 		rst_nmi <= 1'b1;
 		wrregs <= 1'b0;
 		wrsregs <= 1'b0;
+		ld_div16 <= 1'b0;
+		ld_div32 <= 1'b0;
 		state <= IFETCH;
 	end
 	else begin
 		rst_nmi <= 1'b0;
 		wrregs <= 1'b0;
 		wrsregs <= 1'b0;
+		ld_div16 <= 1'b0;
+		ld_div32 <= 1'b0;
 
 `include "WRITE_BACK.v"
 
@@ -781,6 +795,7 @@ always @(posedge CLK)
 `include "INSB.v"
 `include "OUTSB.v"
 `include "XCHG_MEM.v"
+`include "DIVIDE.v"
 
 			default:
 				state <= IFETCH;

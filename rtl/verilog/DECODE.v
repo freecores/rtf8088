@@ -95,14 +95,14 @@ DECODE:
 			af <= (al[3:0]>4'h9 || af);
 			cf <= (al[3:0]>4'h9 || af);
 		end
-	`ADD_ALI8,`ADC_ALI8,`SUB_ALI8,`SBB_ALI8,`AND_ALI8,`OR_ALI8,`XOR_ALI8,`CMP_ALI8:
+	`ADD_ALI8,`ADC_ALI8,`SUB_ALI8,`SBB_ALI8,`AND_ALI8,`OR_ALI8,`XOR_ALI8,`CMP_ALI8,`TEST_ALI8:
 		begin
 			w <= 1'b0;
 			a <= {{8{al[7]}},al};
 			rrr <= 3'd0;
 			state <= FETCH_IMM8;
 		end
-	`ADD_AXI16,`ADC_AXI16,`SUB_AXI16,`SBB_AXI16,`AND_AXI16,`OR_AXI16,`XOR_AXI16,`CMP_AXI16:
+	`ADD_AXI16,`ADC_AXI16,`SUB_AXI16,`SBB_AXI16,`AND_AXI16,`OR_AXI16,`XOR_AXI16,`CMP_AXI16,`TEST_AXI16:
 		begin
 			w <= 1'b1;
 			a <= ax;
@@ -278,7 +278,7 @@ DECODE:
 		//-----------------------------------------------------------------
 		// MOD/RM instructions
 		//-----------------------------------------------------------------
-		$display("Fetching mod/rm");
+		$display("Fetching mod/rm, w=",w);
 		if (ir==`MOV_R2S || ir==`MOV_S2R)
 			w <= 1'b1;
 		if (ir==`LDS || ir==`LES)
