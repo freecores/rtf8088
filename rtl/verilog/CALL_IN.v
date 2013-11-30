@@ -2,7 +2,7 @@
 // CALL NEAR Indirect
 //
 // 2009-2012 Robert Finch
-// robfinch<remove>@opencores.org
+// robfinch<remove>@finitron.ca
 //
 // This source file is free software: you can redistribute it and/or modify 
 // it under the terms of the GNU Lesser General Public License as published 
@@ -20,32 +20,17 @@
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //
 CALL_IN:
-	if (!cyc_o) begin
-		cyc_type <= `CT_WRMEM;
-		cyc_o <= 1'b1;
-		stb_o <= 1'b1;
-		we_o  <= 1'b1;
-		adr_o <= sssp;
-		dat_o <= ip[15:8];
-	end
+	if (!cyc_o)
+		write(`CT_WRMEM,sssp,ip[15:8]);
 	else if (ack_i) begin
-		cyc_type <= `CT_PASSIVE;
+		pause_stack_push();
 		state <= CALL_IN1;
-		sp <= sp_dec;
-		stb_o <= 1'b0;
-		we_o  <= 1'b0;
 	end
 CALL_IN1:
-	if (!stb_o) begin
-		cyc_type <= `CT_WRMEM;
-		cyc_o <= 1'b1;
-		stb_o <= 1'b1;
-		we_o  <= 1'b1;
-		adr_o <= sssp;
-		dat_o <= ip[7:0];
-	end
+	if (!stb_o)
+		write(`CT_WRMEM,sssp,ip[7:0]);
 	else if (ack_i) begin
-		cyc_type <= `CT_PASSIVE;
+		nack();
 		ea <= {cs,`SEG_SHIFT}+b;
 		if (mod==2'b11) begin
 			ip <= b;
@@ -53,35 +38,21 @@ CALL_IN1:
 		end
 		else 
 			state <= CALL_IN2;
-		cyc_o <= 1'b0;
-		stb_o <= 1'b0;
-		we_o  <= 1'b0;
 	end
 CALL_IN2:
-	if (!cyc_o) begin
-		cyc_type <= `CT_RDMEM;
-		cyc_o <= 1'b1;
-		stb_o <= 1'b1;
-		we_o  <= 1'b0;
-		adr_o <= ea;
-	end
+	if (!cyc_o)
+		read(`CT_RDMEM,ea);
 	else if (ack_i) begin
-		cyc_type <= `CT_PASSIVE;
-		stb_o <= 1'b0;
+		pause_read();
 		state <= CALL_IN3;
 		b[7:0] <= dat_i;
 	end
 CALL_IN3:
-	if (!stb_o) begin
-		cyc_type <= `CT_RDMEM;
-		stb_o <= 1'b1;
-		adr_o <= ea_inc;
-	end
+	if (!stb_o)
+		read(`CT_RDMEM,ea_inc);
 	else if (ack_i) begin
-		cyc_type <= `CT_PASSIVE;
+		nack();
 		state <= CALL_IN4;
-		cyc_o <= 1'b0;
-		stb_o <= 1'b0;
 		b[15:8] <= dat_i;
 	end
 CALL_IN4:

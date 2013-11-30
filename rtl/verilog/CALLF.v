@@ -2,9 +2,9 @@
 //  CALL FAR and CALL FAR indirect
 //
 //
-//  2009-2012 Robert Finch
+//  2009-2013 Robert Finch
 //  Stratford
-//  robfinch<remove>@opencores.org
+//  robfinch<remove>@finitron.ca
 //
 //
 // This source file is free software: you can redistribute it and/or modify 
@@ -25,47 +25,43 @@
 //
 CALLF:
 	begin
-		`INITIATE_STACK_WRITE
+		write(`CT_WRMEM,sssp,cs[15:8]);
 		lock_o <= 1'b1;
-		dat_o <= cs[15:8];
 		state <= CALLF1;
 	end
 CALLF1:
 	if (ack_i) begin
-		`PAUSE_STACK_WRITE
+		pause_stack_push();
 		state <= CALLF2;
 	end
 CALLF2:
 	begin
-		`INITIATE_STACK_WRITE
-		dat_o <= cs[7:0];
+		write(`CT_WRMEM,sssp,cs[7:0]);
 		state <= CALLF3;
 	end
 CALLF3:
 	if (ack_i) begin
-		`PAUSE_STACK_WRITE
+		pause_stack_push();
 		state <= CALLF4;
 	end
 CALLF4:
 	begin
-		`INITIATE_STACK_WRITE
-		dat_o <= ip[15:8];
+		write(`CT_WRMEM,sssp,ip[15:8]);
 		state <= CALLF5;
 	end
 CALLF5:
 	if (ack_i) begin
-		`PAUSE_STACK_WRITE
+		pause_stack_push();
 		state <= CALLF6;
 	end
 CALLF6:
 	begin
-		`INITIATE_STACK_WRITE
-		dat_o <= ip[7:0];
+		write(`CT_WRMEM,sssp,ip[7:0]);
 		state <= CALLF7;
 	end
 CALLF7:
 	if (ack_i) begin
-		`TERMINATE_CYCLE
+		nack();
 		if (ir==8'hFF && rrr==3'b011)	// CALL FAR indirect
 			state <= JUMP_VECTOR1;
 		else begin

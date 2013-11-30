@@ -2,9 +2,9 @@
 //  CMPSB
 //
 //
-//  2009-2012 Robert Finch
+//  2009-2013 Robert Finch
 //  Stratford
-//  robfinch<remove>@opencores.org
+//  robfinch<remove>@finitron.ca
 //
 //
 // This source file is free software: you can redistribute it and/or modify 
@@ -24,20 +24,15 @@
 //=============================================================================
 //
 CMPSB:
-`include "check_for_ints.v"
-	else begin
-		cyc_type <= `CT_RDMEM;
+	begin
+		read(`CT_RDMEM,{seg_reg,`SEG_SHIFT} + si);
 		lock_o <= 1'b0;
-		cyc_o <= 1'b1;
-		stb_o <= 1'b1;
-		we_o  <= 1'b0;
-		adr_o <= {seg_reg,`SEG_SHIFT} + si;
 		state <= CMPSB1;
 	end
 CMPSB1:
 	if (ack_i) begin
+		nack();
 		state <= CMPSB2;
-		`TERMINATE_CYCLE
 		lock_o <= 1'b0;
 		a[ 7:0] <= dat_i[7:0];
 		a[15:8] <= {8{dat_i[7]}};
@@ -45,17 +40,13 @@ CMPSB1:
 CMPSB2:
 	begin
 		state <= CMPSB3;
-		cyc_type <= `CT_RDMEM;
+		read(`CT_RDMEM,esdi);
 		lock_o <= 1'b0;
-		cyc_o <= 1'b1;
-		stb_o <= 1'b1;
-		we_o  <= 1'b0;
-		adr_o <= esdi;
 	end
 CMPSB3:
 	if (ack_i) begin
+		nack();
 		state <= CMPSB4;
-		`TERMINATE_CYCLE
 		lock_o <= 1'b0;
 		b[ 7:0] <= dat_i[7:0];
 		b[15:8] <= {8{dat_i[7]}};
@@ -78,7 +69,8 @@ CMPSB4:
 		end
 		if ((repz & !cxz & zf) | (repnz & !cxz & !zf)) begin
 			cx <= cx_dec;
-			state <= CMPSB;
+			ip <= ir_ip;
+			state <= IFETCH;
 		end
 		else
 			state <= IFETCH;

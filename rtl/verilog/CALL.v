@@ -2,9 +2,9 @@
 //  CALL NEAR
 //
 //
-//  2009-2012 Robert Finch
+//  2009-2013 Robert Finch
 //  Stratford
-//  robfinch<remove>@opencores.org
+//  robfinch<remove>@finitron.ca
 //
 //
 // This source file is free software: you can redistribute it and/or modify 
@@ -25,25 +25,23 @@
 //
 CALL:
 	begin
-		`INITIATE_STACK_WRITE
+		write(`CT_WRMEM,sssp,ip[15:8]);
 		lock_o <= 1'b1;
-		dat_o <= ip[15:8];
 		state <= CALL1;
 	end
 CALL1:
 	if (ack_i) begin
 		state <= CALL2;
-		`PAUSE_STACK_WRITE
+		pause_stack_push();
 	end
 CALL2:
 	begin
 		state <= CALL3;
-		`INITIATE_STACK_WRITE
-		dat_o <= ip[7:0];
+		write(`CT_WRMEM,sssp,ip[7:0]);
 	end
 CALL3:
 	if (ack_i) begin
-		`TERMINATE_CYCLE
+		nack();
 		lock_o <= 1'b0;
 		ip <= ip + disp16;
 		state <= IFETCH;

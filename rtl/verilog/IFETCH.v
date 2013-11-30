@@ -36,6 +36,7 @@
 //
 IFETCH:
 	begin
+		$display("CSIP: %h", csip);
 		// Reset all instruction processing flags at instruction fetch
 		cyc_type <= `CT_PASSIVE;
 		mod <= 2'd0;
@@ -77,7 +78,7 @@ IFETCH:
         end
         else begin
 			state <= IFETCH_ACK;
-			`INITIATE_CODE_READ
+			read(`CT_CODE,csip);
 			inta_o <= 1'b0;
 			mio_o <= 1'b1;
 			lock_o <= bus_locked;
@@ -86,8 +87,7 @@ IFETCH:
 
 IFETCH_ACK:
 	if (ack_i) begin
-		`TERMINATE_CODE_READ
-		ir <= dat_i;
+		nack_ir();
 		$display("IR: %h",dat_i);
 		if (!hasPrefix)
 			ir_ip <= ip;
@@ -106,13 +106,12 @@ IFETCH_ACK:
 //
 XI_FETCH:
 	begin
-		`INITIATE_CODE_READ
+		read(`CT_CODE,csip);
 		state <= XI_FETCH_ACK;
 	end
 
 XI_FETCH_ACK:
 	if (ack_i) begin
-		`TERMINATE_CODE_READ
-		ir2 <= dat_i;
+		nack_ir2();
 		state <= DECODER2;
 	end
